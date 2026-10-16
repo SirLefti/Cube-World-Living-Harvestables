@@ -231,13 +231,12 @@ extern "C" void OnCreatureHit(Creature* victim)
     }
 }
 
-// ---- hook stubs -------------------------------------------------------------
+// ---- hook stub --------------------------------------------------------------
 extern "C" {
-    uint32_t jmp_back_a = 0;
-    uint32_t jmp_back_b = 0;
+    uint32_t jmp_back = 0;
 }
 
-extern "C" __attribute__((naked)) void HookBody()
+extern "C" __attribute__((naked)) void HookStub()
 {
     asm("pushfd");                              // flags
     asm("pushad");                              // esp -= 32
@@ -268,19 +267,7 @@ extern "C" __attribute__((naked)) void HookBody()
     asm("popfd");
 
     asm("movss xmm0, dword ptr [esi + 0x16c]"); // original code
-    asm("ret");
-}
-
-extern "C" __attribute__((naked)) void HookStubA()
-{
-    asm("call _HookBody");
-    asm("jmp dword ptr [_jmp_back_a]");
-}
-
-extern "C" __attribute__((naked)) void HookStubB()
-{
-    asm("call _HookBody");
-    asm("jmp dword ptr [_jmp_back_b]");
+    asm("jmp dword ptr [_jmp_back]");           // -> subss xmm0, [ebx+0x10]
 }
 
 // ---- patching ---------------------------------------------------------------
@@ -333,10 +320,8 @@ extern "C" __declspec(dllexport) BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD
 
     rng.Seed();
 
-    jmp_back_a = base + RVA_HIT_A + HOOK_LEN;
-    jmp_back_b = base + RVA_HIT_B + HOOK_LEN;
+    jmp_back = base + RVA_HIT + HOOK_LEN;
 
-    PatchSite(RVA_HIT_A, (void*)&HookStubA);
-    PatchSite(RVA_HIT_B, (void*)&HookStubB);
+    PatchSite(RVA_HIT, (void*)&HookStub);
     return TRUE;
 }

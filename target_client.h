@@ -4,9 +4,7 @@
 
 #include <stdint.h>
 
-// hit-resolution happens at two locations in the same function, we patch both
-static const uint32_t RVA_HIT_A           = 0x00195FEE;
-static const uint32_t RVA_HIT_B           = 0x00196011;
+static const uint32_t RVA_HIT             = 0x00195FEE;
 
 static const uint32_t RVA_GET_MAX_HP      = 0x00044DB0; // Creature::GetMaxHP -> st0
 
